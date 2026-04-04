@@ -16,4 +16,7 @@ fn main(){
     
     println!("av-engine starting ...");
     println!("Thread pool: {} physical workers ready",physical_cores);
+    
+    let rule_count = engines::yara::rule_count();
+    println!("YARA rules compiled - {} rules loaded",rule_count);
 }
