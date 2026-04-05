@@ -1,9 +1,10 @@
 mod engines;
-mod thread_db;
+mod threat_db;
 mod walker;
 mod report;
 
 use rayon::ThreadPoolBuilder;
+use std::sync::Arc;
 
 fn main(){
     
@@ -19,4 +20,7 @@ fn main(){
     
     let rule_count = engines::yara::rule_count();
     println!("YARA rules compiled - {} rules loaded",rule_count);
+
+    let db = Arc::new(threat_db::ThreatDb::load("data/threats.txt"));
+    println!("Threat DB loaded - {} hashes indexed", db.count());
 }

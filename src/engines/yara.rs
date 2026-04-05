@@ -2,9 +2,6 @@ use once_cell::sync::Lazy;
 use std::sync::Arc;
 use yara_x::{Rules};
 
-
-
-
 pub static RULES: Lazy<Arc<Rules>> = Lazy::new(|| {
     let mut compiler = yara_x::Compiler::new();
 
@@ -27,7 +24,7 @@ pub struct YaraResult {
 
 pub fn scan(bytes: &[u8]) -> YaraResult {
     let mut scanner = yara_x::Scanner::new(&RULES);
-    let results = scanner.scan(bytes).expect("YARA sacn failed");
+    let results = scanner.scan(bytes).expect("YARA scan failed");
     
     let rule_names: Vec<String> = results
         .matching_rules()
