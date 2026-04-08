@@ -10,7 +10,7 @@ use std::sync::Arc;
 
 const CHANNEL_CAP: usize = 4096;
 
-fn format_count(n:usize) -> String {
+pub fn format_count(n:usize) -> String {
     let s = n.to_string();
     let mut result = String::new();
     for (i, ch) in s.chars().rev().enumerate(){
@@ -41,7 +41,7 @@ fn main(){
     
     let (tx, rx) = channel::bounded::<PathBuf>(CHANNEL_CAP);
     
-    println!();
+        println!();
         println!("┌─────────────────────────────────────┐");
         println!("│         av-engine ready             │");
         println!("├─────────────────────────────────────┤");
@@ -67,8 +67,6 @@ fn main(){
             elapsed.as_secs_f64()
         );
         println!("Walker finished");
-    
-
 }
 
 
