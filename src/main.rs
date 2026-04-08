@@ -10,6 +10,18 @@ use std::sync::Arc;
 
 const CHANNEL_CAP: usize = 4096;
 
+fn format_count(n:usize) -> String {
+    let s = n.to_string();
+    let mut result = String::new();
+    for (i, ch) in s.chars().rev().enumerate(){
+        if i > 0 && i % 3 == 0 {
+            result.push(',')
+        }
+        result.push(ch);
+    }
+    result.chars().rev().collect()
+}
+
 fn main(){
     
     let physical_cores = num_cpus::get_physical();
@@ -27,7 +39,7 @@ fn main(){
     let db = Arc::new(threat_db::ThreatDb::load("data/threats.txt"));
     println!("Threat DB loaded - {} hashes indexed", db.count());
     
-    let (_tx, _rx) = channel::bounded::<PathBuf>(CHANNEL_CAP);
+    let (tx, rx) = channel::bounded::<PathBuf>(CHANNEL_CAP);
     
     println!();
         println!("┌─────────────────────────────────────┐");
@@ -38,4 +50,25 @@ fn main(){
         println!("│ known threats: {:<21}│", db.count());
         println!("│ channel cap  : {:<21}│", CHANNEL_CAP);
         println!("└─────────────────────────────────────┘");
+        println!();
+        
+        let start = std::time::Instant::now();
+        
+        let walker_thread = std::thread::spawn(move || {
+            walker::walk_and_send(".", tx)
+        });
+        
+        drop(rx);
+        let file_count = walker_thread.join().expect("Walker thread panicked");
+        let elapsed = start.elapsed();
+        
+        println!("Walked {:>9} files in {:.2}s",
+            format_count(file_count),
+            elapsed.as_secs_f64()
+        );
+        println!("Walker finished");
+    
+
 }
+
+
