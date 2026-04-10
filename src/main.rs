@@ -26,7 +26,7 @@ fn main(){
     
     let physical_cores = num_cpus::get_physical();
     ThreadPoolBuilder::new()
-        .num_threads(physical_cores)
+        .num_threads(physical_cores-1)
         .build_global()
         .expect("Failed to build rayon thread pool");
     
