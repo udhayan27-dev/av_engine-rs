@@ -2,6 +2,7 @@ mod engines;
 mod threat_db;
 mod walker;
 mod report;
+mod scanner;
 
 use crossbeam::channel;
 use std::path::PathBuf;
@@ -57,8 +58,8 @@ fn main(){
         let walker_thread = std::thread::spawn(move || {
             walker::walk_and_send(".", tx)
         });
-        
-        drop(rx);
+       
+        let results = scanner::run_workers(rx, Arc::clone(&db));
         let file_count = walker_thread.join().expect("Walker thread panicked");
         let elapsed = start.elapsed();
         
@@ -66,7 +67,8 @@ fn main(){
             format_count(file_count),
             elapsed.as_secs_f64()
         );
-        println!("Walker finished");
+        
+        report::print_summary(&results, elapsed.as_secs_f64());
 }
 
 
