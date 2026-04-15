@@ -8,35 +8,23 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 pub fn run_workers(rx: Receiver<PathBuf>, db: Arc<ThreatDb>) -> Vec<ScanResult> {
-    let thread_count = num_cpus::get_physical();
     let (result_tx, result_rx) = crossbeam::channel::unbounded::<ScanResult>();
 
-    let mut handles = vec![];
-
-    for _ in 0..thread_count {
-        let rx = rx.clone();
-        let db = Arc::clone(&db);
-        let result_tx = result_tx.clone();
-
-        let handle = std::thread::spawn(move || {
-            for path in rx.iter() {
-                if let Some(result) = scan_file(path, &db) {
+    
+    rayon::scope(|s| {
+        for path in rx {
+            let db = Arc::clone(&db);
+            let result_tx = result_tx.clone();
+            s.spawn(move |_| {
+                if let Some(result) = scan_file(path, &db){
                     let _ = result_tx.send(result);
                 }
-            }
-        });
-
-        handles.push(handle);
-    }
+            });
+        }
+    });    
 
     drop(result_tx);
-
-
-    for handle in handles {
-        handle.join().expect("Worker thread panicked");
-    }
-
-    result_rx.into_iter().collect()
+     result_rx.into_iter().collect()
 }
 
 fn scan_file(path: PathBuf, db: &ThreatDb) -> Option<ScanResult> {

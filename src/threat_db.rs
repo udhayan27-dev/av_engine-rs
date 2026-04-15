@@ -37,8 +37,8 @@ impl ThreatDb {
         self.hashes.len()
     }
     
-    pub fn check(&self,hash: &str) -> bool {
-        let hash = hash.to_lowercase();
+        pub fn check(&self,hash: &str) -> bool {
+            let hash = hash.to_lowercase();
         {
             let bloom = self.bloom.read().unwrap();
             if !bloom.check(hash.as_bytes()) {

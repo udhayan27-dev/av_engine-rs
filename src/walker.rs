@@ -1,10 +1,8 @@
 use std::path::PathBuf;
-use dashmap::mapref::entry;
-use rayon::prelude::*;
 use walkdir::WalkDir;
 use crossbeam::channel::Sender;
-use std::sync::Arc;
-use std::sync::atomic::{AtomicUsize,Ordering};
+
+
 
 pub fn walk_and_send(root: &str, tx: Sender<PathBuf>) -> usize{
     
@@ -18,7 +16,7 @@ pub fn walk_and_send(root: &str, tx: Sender<PathBuf>) -> usize{
         .filter(|e| e.file_type().is_file())
     {
         let _ = tx.send(entry.into_path());
-        counter.fetch_add(1, Ordering::Relaxed);
+        counter += 1
     }   
-    counter.load(Ordering::Relaxed)
+    counter
 }
