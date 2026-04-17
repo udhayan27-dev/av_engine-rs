@@ -24,7 +24,7 @@ pub fn run_workers(rx: Receiver<PathBuf>, db: Arc<ThreatDb>) -> Vec<ScanResult> 
     });    
 
     drop(result_tx);
-     result_rx.into_iter().collect()
+    result_rx.into_iter().collect()
 }
 
 fn scan_file(path: PathBuf, db: &ThreatDb) -> Option<ScanResult> {
@@ -47,10 +47,14 @@ fn scan_file(path: PathBuf, db: &ThreatDb) -> Option<ScanResult> {
     };
     let bytes: &[u8] = &mmap;
 
-    let hash_result = engines::hash::scan(bytes);
-    let yara_result = engines::yara::scan(bytes);
-    let heuristic_result = engines::heuristic::scan(bytes);
-
+    let(hash_result, (yara_result, heuristic_result)) = rayon::join(
+        || engines::hash::scan(bytes),
+        || rayon::join(
+            ||engines::yara::scan(bytes),
+            ||engines::heuristic::scan(bytes),
+        ),
+    );
+    
     let is_threat =
         db.check(&hash_result.hash) || yara_result.matched || heuristic_result.suspicious;
 

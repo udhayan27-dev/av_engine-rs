@@ -13,6 +13,13 @@ pub fn walk_and_send(root: &str, tx: Sender<PathBuf>) -> usize{
         .follow_links(false)
         .into_iter()
         .filter_map(|e| e.ok())
+        .filter(|e| {
+            let path = e.path();
+            !path.components().any(|c| {
+                let s = c.as_os_str().to_string_lossy();
+                s == "target" || s.starts_with('.')
+            })
+        })
         .filter(|e| e.file_type().is_file())
     {
         let _ = tx.send(entry.into_path());
