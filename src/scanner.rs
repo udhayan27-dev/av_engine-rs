@@ -51,7 +51,7 @@ fn scan_file(path: PathBuf, db: &ThreatDb) -> Option<ScanResult> {
         || engines::hash::scan(bytes),
         || rayon::join(
             ||engines::yara::scan(bytes),
-            ||engines::heuristic::scan(bytes),
+            ||engines::heuristic::scan_with_path(bytes, &path),
         ),
     );
     

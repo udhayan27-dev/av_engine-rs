@@ -2,6 +2,7 @@ use std::path::PathBuf;
 use walkdir::WalkDir;
 use crossbeam::channel::Sender;
 
+const EXCLUDED_DIRS: &[&str] = &["target", ".git", ".cache", ".cargo"];
 
 
 pub fn walk_and_send(root: &str, tx: Sender<PathBuf>) -> usize{
@@ -17,7 +18,7 @@ pub fn walk_and_send(root: &str, tx: Sender<PathBuf>) -> usize{
             let path = e.path();
             !path.components().any(|c| {
                 let s = c.as_os_str().to_string_lossy();
-                s == "target" || s.starts_with('.')
+                EXCLUDED_DIRS.iter().any(|&excluded| s == excluded)
             })
         })
         .filter(|e| e.file_type().is_file())

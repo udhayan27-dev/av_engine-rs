@@ -56,7 +56,7 @@ fn main(){
         let start = std::time::Instant::now();
         
         let walker_thread = std::thread::spawn(move || {
-            walker::walk_and_send(".", tx)
+            walker::walk_and_send("/home/udhayan", tx)
         });
        
         let results = scanner::run_workers(rx, Arc::clone(&db));
